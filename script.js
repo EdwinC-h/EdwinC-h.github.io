@@ -37,7 +37,7 @@ heart.addEventListener("click", () => {
       // ocultar el título después de unos segundos
       setTimeout(() => growTitle.classList.remove('visible'), 3000);
     }
-    // No revelamos mensaje aún; esperaré al desplazamiento del árbol para mostrar texto y contador.
+    // No revelamos mensaje aún; esperaré al desplazamiento del árbol para mostrar texto y contador.
     // (se hará más abajo en onMoveEnd)
   }, 1200);
 
@@ -70,23 +70,39 @@ heart.addEventListener("click", () => {
   setTimeout(() => {
     blowAwayLeaves();
   }, 4600);
-
-  
 });
 
-/*APARTADO PARA PERSONALIZACION DE LINKS AL CLIENTE */ 
+/*APARTADO PARA PERSONALIZACION DE LINKS AL CLIENTE */
 function getNombreCliente() {
   const params = new URLSearchParams(window.location.search);
   return params.get("nombre") || "Mi amor";
 }
 
+function getFechaInicio() {
+  const params = new URLSearchParams(window.location.search);
+  // Formato esperado: YYYY-MM-DD o YYYY-MM-DDTHH:MM:SS
+  const fechaParam = params.get("fecha");
+  if (!fechaParam) return new Date(2021, 8, 13, 0, 0, 0); // Por defecto 13 de septiembre de 2021
+  
+  try {
+    return new Date(fechaParam);
+  } catch (e) {
+    console.warn("Fecha inválida, usando por defecto", e);
+    return new Date(2021, 8, 13, 0, 0, 0);
+  }
+}
 
+function getMensajeTypewriter() {
+  const params = new URLSearchParams(window.location.search);
+  // Si el parámetro viene con \n, reemplazarlos por saltos reales
+  const mensaje = params.get("mensaje") || "Para el amor de mi vida: \nSi pudiera elegir a una persona para pasar el resto\nde mi vida, serías tú. \nTe amo mucho mi amor.";
+  return mensaje.replace(/\\n/g, '\n');
+}
 
 /*ESTE APARTADO YA ES SOLO PARA LAS HOJAS*/
 function growLeaves() {
   const leaves = document.getElementById("leaves");
   leaves.innerHTML = "";
-
   const colors = [
     "#ff1744",
     "#f34e1c",
@@ -95,7 +111,6 @@ function growLeaves() {
     "#fd7899",
     "#db1717",
   ];
-
   const W = leaves.offsetWidth || 200;
   const H = leaves.offsetHeight || 160;
 
@@ -112,7 +127,7 @@ function growLeaves() {
     return { px, py };
   }
 
-  const TOTAL = 700;       // densidad general
+  const TOTAL = 700; // densidad general
   let placed = 20;
   let attempts = 50;
   const MAX_ATTEMPTS = TOTAL * 90;
@@ -122,20 +137,10 @@ function growLeaves() {
   // =========================
   while (placed < TOTAL && attempts < MAX_ATTEMPTS) {
     attempts++;
-
     // Bias hacia el centro (clave para forma natural)
-    let nx =
-      Math.sign(Math.random() - 0.55) *
-      Math.pow(Math.random(), 0.55) *
-      1.5;
-
-    let ny =
-      Math.sign(Math.random() - 0.5) *
-      Math.pow(Math.random(), 0.6) *
-      0.75;
-
+    let nx = Math.sign(Math.random() - 0.55) * Math.pow(Math.random(), 0.55) * 1.1;
+    let ny = Math.sign(Math.random() - 0.5) * Math.pow(Math.random(), 0.6) * 0.75;
     ny *= 14; // ligera compresión vertical (no aplastado)
-
     if (!inHeart(nx, ny)) continue;
 
     // Suavizar bordes extremos
@@ -153,17 +158,11 @@ function growLeaves() {
     leaf.classList.add("leaf");
     leaf.style.left = `${px + jx}px`;
     leaf.style.top = `${py + jy}px`;
-    leaf.style.background =
-      colors[Math.floor(Math.random() * colors.length)];
-
+    leaf.style.background = colors[Math.floor(Math.random() * colors.length)];
     const scale = 0.45 + Math.random() * 0.6;
-    leaf.style.transform = `
-      rotate(${Math.random() * 360}deg)
-      scale(${scale})
-    `;
+    leaf.style.transform = ` rotate(${Math.random() * 360}deg) scale(${scale}) `;
     leaf.style.animationDelay = `${Math.random() * 1400}ms`;
     leaf.style.animationDuration = `${0.5 + Math.random() * 1.2}s`;
-
     leaves.appendChild(leaf);
     placed++;
   }
@@ -175,7 +174,6 @@ function growLeaves() {
     let nx = (Math.random() * 2 - 1) * 1.02;
     let ny = (Math.random() * 2 - 1) * 0.9;
     ny *= 0.9;
-
     if (!inHeart(nx, ny)) continue;
 
     const { px, py } = toPixel(nx, ny);
@@ -184,16 +182,10 @@ function growLeaves() {
     leaf.classList.add("leaf");
     leaf.style.left = `${px}px`;
     leaf.style.top = `${py}px`;
-    leaf.style.background =
-      colors[Math.floor(Math.random() * colors.length)];
-
-    leaf.style.transform = `
-      rotate(${Math.random() * 360}deg)
-      scale(${0.85 + Math.random() * 0.6})
-    `;
+    leaf.style.background = colors[Math.floor(Math.random() * colors.length)];
+    leaf.style.transform = ` rotate(${Math.random() * 360}deg) scale(${0.85 + Math.random() * 0.6}) `;
     leaf.style.animationDelay = `${Math.random() * 1000}ms`;
     leaf.style.animationDuration = `${0.6 + Math.random() * 1.6}s`;
-
     leaves.appendChild(leaf);
   }
 }
@@ -215,55 +207,54 @@ function blowAwayLeaves() {
   const spawnLeaves = () => {
     // Número aleatorio de hojas a crear (2-5)
     const leafCount = Math.floor(Math.random() * 4) + 2;
-    
     for (let i = 0; i < leafCount; i++) {
       const flyingLeaf = document.createElement("div");
       flyingLeaf.classList.add("flying-leaf");
-      
+
       // Elegir animación aleatoria
       const animations = ["blow", "blow2", "blow3", "blow4", "blow5"];
       flyingLeaf.classList.add(animations[Math.floor(Math.random() * animations.length)]);
-      
+
       // Posición inicial desde diferentes lados del árbol usando ángulos
       const treeX = window.innerWidth / 2 + 240; // árbol está 280px a la derecha
       const treeY = window.innerHeight * 0.45; // altura del árbol
-      
+
       // Ángulo aleatorio alrededor del árbol
       const angle = Math.random() * Math.PI * 2;
       // Distancia desde 0 (centro) hasta 120 (bordes)
       const distance = Math.random() * 150;
-      
+
       flyingLeaf.style.left = `${treeX + Math.cos(angle) * distance}px`;
       flyingLeaf.style.top = `${treeY + Math.sin(angle) * distance}px`;
       flyingLeaf.style.background = colors[Math.floor(Math.random() * colors.length)];
-      
+
       // Tamaño aleatorio (10-20px)
       const size = 10 + Math.random() * 5;
       flyingLeaf.style.width = `${size}px`;
       flyingLeaf.style.height = `${size}px`;
-      
+
       // Ajustar pseudo-elementos al tamaño
       const computedSize = size;
       flyingLeaf.style.setProperty('--leaf-size', `${computedSize}px`);
-      
+
       document.body.appendChild(flyingLeaf);
-      
+
       // Remover la hoja después de la animación
       setTimeout(() => {
         flyingLeaf.remove();
       }, 3000);
     }
-    
+
     // Siguiente generación de hojas en tiempo aleatorio (300ms a 1200ms)
     const nextSpawn = 300 + Math.random() * 900;
     setTimeout(spawnLeaves, nextSpawn);
   };
-  
+
   // Iniciar la espiral infinita
   spawnLeaves();
 }
 
-// -------------------------------------------------------------
+// -----------------------------------------------------------
 // Efecto máquina de escribir para texto en el lado izquierdo
 function typeWriter(text, element, speed = 500) {
   let i = 0;
@@ -292,10 +283,11 @@ function typeWriter(text, element, speed = 500) {
 function startTypewriter() {
   const tw = document.getElementById('typewriter');
   if (tw) {
-    const mensaje = 'Para el amor de mi vida: \nSi pudiera elegir a una persona para pasar el resto\nde mi vida, serías tú. \nTe amo mucho mi amor.';
+    const mensaje = getMensajeTypewriter();
     typeWriter(mensaje, tw, 120);
   }
 }
+
 // animación de título de San Valentín: letra a letra con brillo y escritura
 function animateValentineTitle(el) {
   const text = el.textContent.trim();
@@ -324,15 +316,15 @@ function animateValentineTitle(el) {
     }, delay);
   });
 }
-// Contador de tiempo desde 11 de septiembre de 2021
+
+// Contador de tiempo desde una fecha configurable
 function updateLoveCounter() {
-  const start = new Date(2021, 8, 13, 0, 0, 0); // monthIndex 8 = septiembre
+  const start = getFechaInicio();
   const el = document.getElementById('counter');
   if (!el) return;
 
   function calc() {
     const now = new Date();
-
     let years = now.getFullYear() - start.getFullYear();
     let months = now.getMonth() - start.getMonth();
     let days = now.getDate() - start.getDate();
@@ -340,19 +332,31 @@ function updateLoveCounter() {
     let minutes = now.getMinutes() - start.getMinutes();
     let seconds = now.getSeconds() - start.getSeconds();
 
-    if (seconds < 0) { seconds += 60; minutes--; }
-    if (minutes < 0) { minutes += 60; hours--; }
-    if (hours < 0) { hours += 24; days--; }
+    if (seconds < 0) {
+      seconds += 60;
+      minutes--;
+    }
+    if (minutes < 0) {
+      minutes += 60;
+      hours--;
+    }
+    if (hours < 0) {
+      hours += 24;
+      days--;
+    }
     if (days < 0) {
       const prev = new Date(now.getFullYear(), now.getMonth(), 0);
       days += prev.getDate();
       months--;
     }
-    if (months < 0) { months += 12; years--; }
+    if (months < 0) {
+      months += 12;
+      years--;
+    }
 
-    // siempre generamos un <br> entre el conteo de días y la hora;
+    // siempre generamos un entre el conteo de días y la hora;
     // la hoja de estilos decide si se muestra o no (visible en móviles pequeños)
-    el.innerHTML = `${years} años, ${months} meses, ${days} días<br>— ${hours}h ${minutes}m ${seconds}s`;
+    el.innerHTML = `${years} años, ${months} meses, ${days} días — ${hours}h ${minutes}m ${seconds}s`;
   }
 
   calc();
@@ -369,8 +373,8 @@ function revealMessage() {
   const label = msg.querySelector('.label');
   if (!label) return;
 
-    // Leer el texto desde data-text para evitar que aparezca inicialmente
-    const text = (label.dataset && label.dataset.text) ? label.dataset.text : label.textContent.trim();
+  // Leer el texto desde data-text para evitar que aparezca inicialmente
+  const text = (label.dataset && label.dataset.text) ? label.dataset.text : label.textContent.trim();
   label.innerHTML = '';
 
   // Crear spans por palabra (mantener un espacio al final)
@@ -382,6 +386,7 @@ function revealMessage() {
     // añadir un espacio al final para mantener separación visual
     span.textContent = (w === '') ? ' ' : w + (i < words.length - 1 ? ' ' : '');
     label.appendChild(span);
+
     // si estamos en dispositivo muy estrecho, insertar salto de línea después de "ti"
     if (
       (window.innerWidth <= 390 && window.innerHeight <= 844) &&
@@ -404,6 +409,7 @@ function revealMessage() {
     delay += inc;
     setTimeout(() => s.classList.add('visible'), delay);
   }
+
   // Después de que terminen de aparecer las palabras, mostrar el contador
   setTimeout(() => {
     msg.classList.add('show-counter');
@@ -411,9 +417,7 @@ function revealMessage() {
 }
 
 const nombreCliente = getNombreCliente();
-
 const valentineTitle = document.getElementById("valentine-title");
 if (valentineTitle) {
   valentineTitle.innerText = `¿${nombreCliente}, quieres ser mi San Valentín?`;
 }
-

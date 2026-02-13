@@ -25,8 +25,8 @@ body {
   position: absolute;
   top: 40%;
   left: 50%;
-  width: 60px;
-  height: 60px;
+  width: clamp(40px, 8vw, 60px); 
+  height: clamp(40px, 8vw, 60px);
   background: rgb(184, 0, 0);
   transform: translateX(-50%) rotate(45deg);
   border-radius: 8px; /* suavizar la esquina inferior puntiaguda */
@@ -134,16 +134,17 @@ body {
 #leaves {
   position: absolute;
   bottom: 40px; /* encima del tronco */
+  top: 3%;
   left: 45%;
   transform: translateX(-50%);
-  width: 300px;
-  height: 260px;
+  width: clamp(300px, 60vw, 320px); 
+  height: clamp(240px, 28vh, 260px);
   pointer-events: none;
   z-index: 7;
 }
 
 .leaf {
-  position: absolute;
+  position: absolute; 
   width: 10px;
   height: 10px;
   background: red;
@@ -213,7 +214,7 @@ body {
 }
 
 #message .label {
-  font-size: 20px;
+  font-size: clamp(14px, 3vw, 20px);
   opacity: 0.9;
   margin-bottom: -35px; /* más cerca del contador */
 }
@@ -228,18 +229,6 @@ body {
 }
 
 #counter br { display: none; }
-
-/* Show break on narrow mobile viewport */
-@media (max-width: 390px) and (max-height: 844px) {
-  #counter br { display: block; 
-  max-width: 140px;}
-  /* reducir desplazamiento y apilar mensaje junto al árbol */
-  #message {
-    left: 20%;
-    /* mantener texto centrado en su propio contenedor */
-    text-align: center;
-  }
-}
 
 /* Animación letra por letra */
 #message .label span {
@@ -343,7 +332,7 @@ body {
   left: 50%;
   transform: translateX(-50%) translateY(6px);
   font-family: "Harlow Solid Italic", 'Great Vibes', cursive;
-  font-size: 44px;
+  font-size: clamp(22px, 8vw, 44px);
   color: #c2294f;
   text-align: center;
   z-index: 20;
@@ -484,52 +473,6 @@ body {
   }
 }
 
-/* Media queries para dispositivos pequeños */
-@media (max-width: 768px) {
-  #heart { top: 36%; }
-  #tree img { height: clamp(160px, 30vh, 300px); }
-  #leaves { width: clamp(180px, 60vw, 320px); height: clamp(140px, 28vh, 260px); }
-  #tree-container { bottom: 174px; }
-  #tree-container.move-left { transform: translateX(calc(-50% + 25vw)); }
-  #grow-title { bottom: 340px; font-size: clamp(14px, 3.2vw, 20px); }
-  #valentine-title { font-size: clamp(22px, 8vw, 44px); top: 20%; }
-  #message { top: 75%; }
-  #message .label { font-size: clamp(12px, 3vw, 16px); }
-  #counter { font-size: clamp(14px, 3.5vw, 18px); }
-}
-
-
-
-/* Reduce motion preference respect */
-@media (prefers-reduced-motion: reduce) {
-  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
-}
-
-/* Ajustes específicos para dispositivo 390x844 (portrait) */
-@media (width: 390px) and (height: 844px) and (orientation: portrait) {
-  /* Corazón ligeramente más grande y más arriba */
-  #heart { top: 36%; width: 60px; height: 60px; }
-
-  /* Tronco y hojas más compactas */
-  #tree img { height: 220px;}
-  #leaves { width: 200px; height: 160px; bottom: 58px; }
-
-  /* Posicionamiento del contenedor y desplazamiento reducido */
-  #tree-container { bottom: 144px; left: 50%;}
-  #tree-container.move-left { transform: translateX(calc(-50% + 30vw)); }
-
-  /* Títulos y mensaje */
-  #grow-title { bottom: 250px; font-size: 16px; }
-  #valentine-title { font-size: 24px; top: 25%; }
-  #message { top: 65%; width: 80%; left: 26%; transform: translateX(-50%); }
-  #message .label { font-size: 14px; }
-  #counter { font-size: 14px; }
-  #typewriter { top: 45%; left: 15%; max-width: 80%; font-size: 18px; }
-
-  /* Hojas voladoras más pequeñas */
-  .flying-leaf { width: 12px; height: 12px; }
-}
-
 @keyframes windBlown5 {
   0% {
     transform: translateX(0) translateY(0) rotate(45deg) scale(0.6);
@@ -564,3 +507,37 @@ body {
 .flying-leaf.blow5 {
   animation: windBlown5 3s ease-in forwards;
 }
+  
+
+/* Ajustes específicos para dispositivo 390x844 (portrait) */
+@media (max-width: 390px) and (max-height: 844px) {
+  /* Corazón ligeramente más grande y más arriba */
+  #heart { top: 36%; width: 60px; height: 60px; }
+
+  /* Tronco y hojas más compactas */
+  #tree img { height: 220px;}
+  #leaves { width: 200px; height: 160px; bottom: 58px; left: 45%; }
+
+  /* Posicionamiento del contenedor y desplazamiento reducido */
+  #tree-container { bottom: 144px; left: 50%;}
+  #tree-container.move-left { transform: translateX(calc(-50% + 30vw)); }
+
+  /* Títulos y mensaje */
+  #grow-title { bottom: 250px; font-size: 16px; }
+  #valentine-title { font-size: 30px; top: 25%; max-width: 70%;}
+  #message { top: 68%; width: 84%; left: 35%; transform: translateX(-50%); }
+  #message .label { font-size: 14px; }
+  #counter { font-size: 14px;}
+  #typewriter { top: 50%; left: 15%; max-width: 80%; font-size: 18px; }
+
+  /* Hojas voladoras más pequeñas */
+  .flying-leaf { width: 12px; height: 12px; }
+}
+
+
+
+
+
+
+
+
